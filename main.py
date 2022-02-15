@@ -71,6 +71,8 @@ def enemygenerator():
         enemies.append(player(healthchoice,attackpowerchoice,classchoice))
         print("Heel")
 
+def __str__(self):
+    return F""
 
 
 main()
