@@ -6,11 +6,17 @@ import os
 import time
 classes = ["Warrior", "Paladin", "Hunter" , "Rouge" , "Priest" , "Shaman" , "Mage" , "Warlock" , "Monk" , "Druid" , "Demon Hunter" , "Death Knight" ]
 races = ["Human", "Dwarf", "Night Elf", "Gnome", "Draenei", "Worgen", "Pandaren", "Void Elf", "Lightforged Draenei", "Dark Iron Dwarf", "Kul Tiran", "mechagnome"]
+enemyraces = ["Orc", "Undead", "Tauren", "Troll", "Blood Elf", "Goblin", "Pandaren", "Nightborne", "Highmountain Tauren", "Mag'har Orc", "Zandalari Troll", "Vulpera"]
+enemynames = ["Grog", "Grul", "Brog"]
 teammates = []
 enemies = []
 user = 0
 round = 1
-
+def reset():
+    teammates = []
+    enemies = []
+    user = 0
+    round = 1
 def clearConsole():
     command = 'clear'
     if os.name in ('nt', 'dos'):
@@ -56,6 +62,7 @@ def charactercreator():
     print(f"Health: {user.health}\nAttack: {user.attackpower}\nClass: {user.spec}\nArmor: {user.armor}\nName: {user.name}\nRace: {user.race}")
 
 def main():
+    reset()
     loader()
     while True:
         global teamgennumber
@@ -93,13 +100,24 @@ def main():
             break
         else:
             print("Try again")
-    print(f"Team generator number{teamgennumber}")
-    print(f"Enemy generator number{enemygennumber}")
+
     charactercreator()
 
     teammategenerator()
 
     enemygenerator()
+    round = 1
+
+    while len(enemies) != 0 and len(teammates) != 0:
+        print(f"ROUND {round}, FIGHT!")
+        fight(teammates, enemies)
+        print()
+        round +=1
+    
+    if len(enemies) == 0:
+        print("The alliance won!")
+    elif len(teammates) == 0:
+        print("The horde won!")
 
 def teammategenerator():
     print(f"Team generator number{teamgennumber}")
@@ -116,7 +134,7 @@ def teammategenerator():
 def enemygenerator():
     print(f"Enemy generator number{enemygennumber}")
     for i in range(enemygennumber):
-        enemycurrent = resources.enemy(random.randint(10000,30000),random.randint(2500,7500),random.choice(classes),random.randint(1,50),names.get_first_name(), random.choice(races))
+        enemycurrent = resources.enemy(random.randint(10000,30000),random.randint(2500,7500),random.choice(classes),random.randint(1,50),random.choice(enemynames), random.choice(enemyraces))
         print(f"Health: {enemycurrent.health}\nAttack: {enemycurrent.attackpower}\nClass: {enemycurrent.spec}\nArmor: {enemycurrent.armor}\nName: {enemycurrent.name}\nRace: {enemycurrent.race}\n")
         globals()['teammate%s' % i] = enemycurrent
         enemies.append(enemycurrent)
@@ -124,8 +142,35 @@ def enemygenerator():
     for i in enemies:
         heye += 1
         print(heye)
-
-
-
-
-main()
+def fight(players : list, enemies : list):
+    participants = players + enemies
+    random.shuffle(participants)
+    
+    for char in participants:
+        target = ""
+        if char in players:
+            target = random.choice(enemies)
+        else:
+            target = random.choice(players)
+            
+        target.take_damage(char.get_attackpower())
+        
+        if target.get_health() == 0:
+            print(f"{target.get_name()} has died!")
+            if type(target) == enemy:
+                enemies.remove(target)
+            else:
+                players.remove(target)
+            participants.remove(target)
+        else:
+            print(f"{char.get_name()} has hit {target.get_name()} for {char.get_attackpower()}. {target.get_name()} has {target.get_health()} hp remaining.")
+            time.sleep(0.01)
+        if len(enemies) == 0 or len(players) == 0:
+            break
+def showdown():
+    showndownboard = (">---------------VS-----------------<\n")
+    showdownteammates = teammates
+    showdownenemies = enemies
+    for i in showdownteammates:
+        print
+main() 
